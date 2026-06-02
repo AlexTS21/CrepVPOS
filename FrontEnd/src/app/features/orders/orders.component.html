@@ -1,0 +1,73 @@
+<div class="page">
+    <h2 class="page-title">Órdenes</h2>
+
+    @if (!apertura()) {
+    <div class="empty-state">
+        <span class="empty-icon">🔒</span>
+        <p>No hay caja abierta.</p>
+    </div>
+    } @else {
+    <!-- Filtro de estado -->
+    <div class="filter-tabs">
+        <button class="filter-tab" [class.active]="filter() === 'all'" (click)="filter.set('all')">Todas</button>
+        <button class="filter-tab" [class.active]="filter() === 'pending'" (click)="filter.set('pending')">Por
+            entregar</button>
+        <button class="filter-tab" [class.active]="filter() === 'delivered'"
+            (click)="filter.set('delivered')">Entregadas</button>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span></div>
+    } @else if (filteredOrders().length === 0) {
+    <div class="empty-state">
+        <span class="empty-icon">📋</span>
+        <p>Sin órdenes en esta categoría</p>
+    </div>
+    } @else {
+    <div class="orders-list">
+        @for (order of filteredOrders(); track order.id) {
+        <div class="order-card" [class.delivered]="order.status === 'delivered'">
+            <div class="order-header">
+                <div class="order-id">#{{ order.id }}</div>
+                <span class="order-badge" [class.delivered]="order.status === 'delivered'">
+                    {{ order.status === 'pending' ? 'Por entregar' : 'Entregada' }}
+                </span>
+            </div>
+
+            <div class="order-customer">
+                <span class="customer-name">{{ order.customerName }}</span>
+                @if (order.consumeType === 'dine_in') {
+                <span class="table-badge">Mesa {{ order.tableNumber }}</span>
+                } @else {
+                <span class="table-badge takeout">Para llevar</span>
+                }
+            </div>
+
+            <div class="order-items">
+                @for (item of order.items; track item.productId) {
+                <div class="order-item-row">
+                    <span>{{ item.quantity }}x {{ item.productName }}</span>
+                    <span>{{ item.subtotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                </div>
+                }
+            </div>
+
+            <div class="order-footer">
+                <div class="order-meta">
+                    <span class="meta-time">{{ order.createdAt | date:'HH:mm' }}</span>
+                    <span class="meta-pay">{{ order.paymentMethod === 'cash' ? '💵 Efectivo' : '💳 Tarjeta' }}</span>
+                </div>
+                <div class="order-total">{{ order.total | currency:'MXN':'symbol':'1.2-2' }}</div>
+            </div>
+
+            @if (order.status === 'pending') {
+            <button class="btn-deliver" (click)="markDelivered(order)">
+                Marcar como entregada
+            </button>
+            }
+        </div>
+        }
+    </div>
+    }
+    }
+</div>

@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Colors — light */
+  --bg:           #f8f7f4;
+  --surface:      #ffffff;
+  --border:       #e8e5e0;
+  --text:         #1a1917;
+  --text-muted:   #8a8580;
+  --accent:       #c8472a;         /* Terracota cálido */
+  --accent-light: rgba(200,71,42,0.08);
+  --success:      #22c55e;
+  --danger:       #ef4444;
+
+  /* Typography */
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Spacing */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #111110;
+    --surface:      #1c1c1b;
+    --border:       #2e2d2b;
+    --text:         #f0ede8;
+    --text-muted:   #6b6864;
+    --accent:       #e05a3a;
+    --accent-light: rgba(224,90,58,0.1);
+  }
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+input, select, button, textarea {
+  font-family: inherit;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Number input — hide arrows ────────────────────────────────────────── */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Date input fix ─────────────────────────────────────────────────────── */
+input[type=date] { color-scheme: light dark; }

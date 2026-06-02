@@ -1,0 +1,129 @@
+<div class="page">
+    <h2 class="page-title">Reportes</h2>
+    <p class="page-subtitle">Ciclos completos (apertura → corte)</p>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <div class="filter-row">
+            <div class="field">
+                <label class="field-label">Desde</label>
+                <input class="field-input" type="date" [(ngModel)]="fromDate" />
+            </div>
+            <div class="field">
+                <label class="field-label">Hasta</label>
+                <input class="field-input" type="date" [(ngModel)]="toDate" />
+            </div>
+        </div>
+        <div class="filter-row">
+            <select class="filter-select" [(ngModel)]="filterDept">
+                <option value="">Todos los depts.</option>
+                <option value="creperia">Crepería</option>
+                <option value="tienda">Tienda</option>
+            </select>
+            <button class="btn-primary small" (click)="loadReports()">Buscar</button>
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span></div>
+    } @else if (cycles().length === 0) {
+    <div class="empty-state">
+        <span class="empty-icon">📊</span>
+        <p>Sin ciclos en este período</p>
+    </div>
+    } @else {
+    <div class="cycles-list">
+        @for (cycle of cycles(); track cycle.id) {
+        <div class="cycle-card" [class.expanded]="expandedId() === cycle.id">
+            <div class="cycle-header" (click)="toggleExpand(cycle.id)">
+                <div class="cycle-date">
+                    <span class="cycle-day">{{ cycle.date | date:'dd/MM/yy' }}</span>
+                    <span class="cycle-dept">{{ cycle.department }}</span>
+                </div>
+                <div class="cycle-summary">
+                    <span class="cycle-orders">{{ cycle.totalOrders }} órdenes</span>
+                    <span class="cycle-total">{{ cycle.grandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                </div>
+                <svg class="chevron" [class.rotated]="expandedId() === cycle.id" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </div>
+
+            @if (expandedId() === cycle.id) {
+            <div class="cycle-detail">
+                <!-- Apertura -->
+                <div class="detail-section">
+                    <div class="detail-label">APERTURA</div>
+                    <div class="detail-row">
+                        <span>Hora</span>
+                        <span>{{ cycle.apertura.openedAt | date:'HH:mm' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Efectivo inicial</span>
+                        <span>{{ cycle.apertura.openingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <!-- Corte -->
+                <div class="detail-section">
+                    <div class="detail-label">CORTE</div>
+                    <div class="detail-row">
+                        <span>Hora</span>
+                        <span>{{ cycle.corte.closedAt | date:'HH:mm' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Efectivo contado</span>
+                        <span>{{ cycle.corte.closingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Ventas tarjeta</span>
+                        <span>{{ cycle.corte.cardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Esperado</span>
+                        <span>{{ cycle.corte.expectedCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row highlight" [class.negative]="cycle.corte.difference < 0">
+                        <span>Diferencia</span>
+                        <span>{{ cycle.corte.difference | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <!-- Ventas -->
+                <div class="detail-section">
+                    <div class="detail-label">VENTAS</div>
+                    <div class="detail-row">
+                        <span>Efectivo</span>
+                        <span>{{ cycle.totalCashSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Tarjeta</span>
+                        <span>{{ cycle.totalCardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row strong">
+                        <span>Total</span>
+                        <span>{{ cycle.grandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <!-- Órdenes resume -->
+                <div class="detail-section">
+                    <div class="detail-label">ÓRDENES ({{ cycle.totalOrders }})</div>
+                    @for (order of cycle.orders.slice(0, 5); track order.id) {
+                    <div class="order-mini">
+                        <span>#{{ order.id }} {{ order.customerName }}</span>
+                        <span>{{ order.total | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    }
+                    @if (cycle.orders.length > 5) {
+                    <p class="more-orders">+{{ cycle.orders.length - 5 }} más</p>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>

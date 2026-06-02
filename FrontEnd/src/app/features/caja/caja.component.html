@@ -1,0 +1,115 @@
+<div class="page">
+    <h2 class="page-title">Caja</h2>
+
+
+
+    <!-- Estado actual -->
+    @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span></div>
+    } @else if (apertura()) {
+    <!-- Caja abierta -->
+    <div class="status-card open">
+        <div class="status-header">
+            <span class="status-dot open"></span>
+            <span class="status-label">Caja abierta</span>
+        </div>
+        <div class="status-body">
+            <div class="info-row">
+                <span class="info-key">Apertura</span>
+                <span class="info-val">{{ apertura()!.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Efectivo inicial</span>
+                <span class="info-val">{{ apertura()!.openingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Efectivo inicial Tienda</span>
+                <span class="info-val">{{ apertura()!.tiendaOpeningCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corte de caja -->
+    @if (!corteVisible()) {
+    <button class="btn-danger" (click)="corteVisible.set(true)">Realizar corte</button>
+    } @else {
+    <div class="form-card">
+        <h3 class="form-card-title">Corte de caja</h3>
+
+        <div class="field">
+            <label class="field-label">Efectivo en caja</label>
+            <input class="field-input" type="number" [(ngModel)]="corteData.closingCash" placeholder="0.00" min="0" />
+        </div>
+
+        <div class="field">
+            <label class="field-label">Ventas con tarjeta</label>
+            <input class="field-input" type="number" [(ngModel)]="corteData.cardSales" placeholder="0.00" min="0" />
+        </div>
+
+        @if (corteError()) {
+        <p class="error-msg">{{ corteError() }}</p>
+        }
+
+        <div class="btn-row">
+            <button class="btn-ghost" (click)="corteVisible.set(false)">Cancelar</button>
+            <button class="btn-primary" (click)="realizarCorte()" [disabled]="corteSaving()">
+                @if (corteSaving()) { <span class="spinner-sm"></span> } @else { Confirmar corte }
+            </button>
+        </div>
+    </div>
+    }
+
+    <!-- Último corte -->
+    @if (lastCorte()) {
+    <div class="corte-result-card">
+        <h3 class="form-card-title">Último corte</h3>
+        <div class="info-row">
+            <span class="info-key">Efectivo contado</span>
+            <span class="info-val">{{ lastCorte()!.closingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Tarjeta</span>
+            <span class="info-val">{{ lastCorte()!.cardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Esperado</span>
+            <span class="info-val">{{ lastCorte()!.expectedCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="info-row highlight" [class.negative]="lastCorte()!.difference < 0">
+            <span class="info-key">Diferencia</span>
+            <span class="info-val">{{ lastCorte()!.difference | currency:'MXN':'symbol':'1.2-2' }}</span>
+        </div>
+    </div>
+    }
+
+    } @else {
+    <!-- Caja cerrada — apertura -->
+    <div class="status-card closed">
+        <div class="status-header">
+            <span class="status-dot closed"></span>
+            <span class="status-label">Caja cerrada</span>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3 class="form-card-title">Apertura de caja</h3>
+        <div class="field">
+            <label class="field-label">Efectivo inicial</label>
+            <input class="field-input" type="number" [(ngModel)]="aperturaData.openingCash" placeholder="0.00"
+                min="0" />
+        </div>
+
+        <div class="field">
+            <label class="field-label">Efectivo inicial en Tienda</label>
+            <input class="field-input" type="number" [(ngModel)]="aperturaData.tiendaOpeningCash" placeholder="0.00"
+                min="0" />
+        </div>
+        @if (aperturaError()) {
+        <p class="error-msg">{{ aperturaError() }}</p>
+        }
+        <button class="btn-primary" (click)="realizarApertura()" [disabled]="aperturaSaving()">
+            @if (aperturaSaving()) { <span class="spinner-sm"></span> } @else { Abrir caja }
+        </button>
+    </div>
+    }
+</div>
