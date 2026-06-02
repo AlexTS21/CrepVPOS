@@ -1,0 +1,18 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+
+## Rider / VS
+.idea/
+*.DotSettings.user
+
+## Published output
+publish/
+
+Migrations
