@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProductsService } from '../../core/services/products.service';
 import { Product, ProductRequest, Category, Department } from '../../core/models';
+import { IconComponent } from "../../../shared/icon/app-icon.component";
 
 // SERVICIO: ProductsService — ver /core/services/products.service.ts
 
@@ -17,7 +18,7 @@ const CATEGORIES: { value: Category; label: string }[] = [
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, IconComponent],
   templateUrl: 'inventory.component.html',
   styleUrl: 'inventory.component.css',
 })
@@ -29,7 +30,6 @@ export class InventoryComponent implements OnInit {
   categories = CATEGORIES;
 
   filterCat = '';
-  filterDept = '';
 
   formVisible = signal(false);
   editingProduct = signal<Product | null>(null);
@@ -44,7 +44,6 @@ export class InventoryComponent implements OnInit {
     this.loading.set(true);
     this.productsService.getProducts({
       category: this.filterCat as Category || undefined,
-      department: this.filterDept as Department || undefined,
     }).subscribe({
       next: p => { this.products.set(p); this.loading.set(false); },
       error: () => this.loading.set(false),
@@ -96,6 +95,12 @@ export class InventoryComponent implements OnInit {
     this.productsService.deleteProduct(p.id).subscribe({
       next: () => this.products.update(list => list.filter(x => x.id !== p.id)),
     });
+  }
+
+  isValidProduct(): boolean{
+    if (!this.formData.name.trim()) return false;
+    if (this.formData.price < 0) return false;
+    return true;
   }
 
   catLabel(cat: Category): string {

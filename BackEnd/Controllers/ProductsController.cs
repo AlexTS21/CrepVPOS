@@ -15,14 +15,10 @@ public class ProductsController(AppDbContext db) : ControllerBase
     // GET /api/products?department=creperia&category=dulces&search=nutella
     [HttpGet]
     public async Task<ActionResult<List<ProductDto>>> GetProducts(
-        [FromQuery] string? department,
         [FromQuery] string? category,
         [FromQuery] string? search)
     {
         var query = db.Products.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(department) && Enum.TryParse<Department>(department, out var dept))
-            query = query.Where(p => p.Department == dept);
 
         if (!string.IsNullOrWhiteSpace(category) && Enum.TryParse<Category>(category, out var cat))
             query = query.Where(p => p.Category == cat);

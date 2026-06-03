@@ -71,6 +71,10 @@ input[type=number] { -moz-appearance: textfield; }
 /* ── Date input fix ─────────────────────────────────────────────────────── */
 input[type=date] { color-scheme: light dark; }
 
+app-icon{
+  color: var(--text);
+  height: 20px;
+}
 
 
 .btn-primary {

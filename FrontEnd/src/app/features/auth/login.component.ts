@@ -184,12 +184,31 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
 
-    this.auth.login({ username: this.username, password: this.password }).subscribe({
-      next: () => this.router.navigate(['/pos']),
-      error: () => {
-        this.error.set('Credenciales incorrectas');
-        this.loading.set(false);
+    this.auth.login({
+      username: this.username,
+      password: this.password
+    }).subscribe({
+      next: () => {
+        this.router.navigate(['/pos']);
       },
+      error: (err) => {
+        console.error(err);
+
+        if (err.status === 401) {
+          this.error.set('Usuario o contraseña incorrectos');
+        }
+        else if (err.status === 500) {
+          this.error.set('Error de conexión con la base de datos');
+        }
+        else if (err.status === 0) {
+          this.error.set('No se pudo conectar al servidor');
+        }
+        else {
+          this.error.set(`Error inesperado (${err.status})`);
+        }
+
+        this.loading.set(false);
+      }
     });
   }
 }

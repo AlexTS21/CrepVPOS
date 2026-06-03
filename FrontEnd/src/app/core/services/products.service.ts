@@ -21,7 +21,6 @@ export class ProductsService {
   // ── GET /products ─────────────────────────────────────────────────────────
   getProducts(filters?: { department?: Department; category?: Category; search?: string }): Observable<Product[]> {
     const params = new URLSearchParams();
-    if (filters?.department) params.set('department', filters.department);
     if (filters?.category)   params.set('category', filters.category);
     if (filters?.search)     params.set('search', filters.search);
     const qs = params.toString();

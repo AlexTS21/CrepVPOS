@@ -10,7 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Database ──────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+
+            sqlOptions.CommandTimeout(60);
+        }));
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
 var jwtKey      = builder.Configuration["Jwt:Key"]      ?? "CafeCreperiaSecretKey2024!SuperSecure";
@@ -45,7 +54,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:4200",
-                "https://localhost:4200"
+                "https://localhost:4200",
+                "https://6zkl4pnc-4200.usw3.devtunnels.ms"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
