@@ -36,25 +36,32 @@
     
 
     <!-- Sugerencias -->
-    @if (suggestions().length > 0) {
     <div class="suggestions">
-        @for (p of suggestions(); track p.id) {
-        <div class="suggestion-item" (click)="addToCart(p)">
-            <div class="sugg-info">
-                <span class="sugg-name">{{ p.name }}</span>
-                <span class="sugg-cat">{{ categoryLabel(p.category) }}</span>
+        @if (suggestions().length > 0) {
+        
+            @for (p of suggestions(); track p.id) {
+            <div class="suggestion-item" (click)="addToCart(p)">
+                <div class="sugg-info">
+                    <span class="sugg-name">{{ p.name }}</span>
+                    <span class="sugg-cat">{{ categoryLabel(p.category) }}</span>
+                </div>
+                <span class="sugg-price">{{ p.price | currency:'MXN':'symbol':'1.2-2' }}</span>
             </div>
-            <span class="sugg-price">{{ p.price | currency:'MXN':'symbol':'1.2-2' }}</span>
-        </div>
+            }
+    
+        }@else {
+            <div class="suggestion-item">
+                <span class="sugg-cat"> No se encontraron productos :(</span>
+               
+            </div>
         }
     </div>
-    }
 
      <!-- Tienda: precio libre -->
     <div class="tienda-price-card">
-        <label class="field-label">Precio del producto en Tienda</label>
-        <input class="field-input big-input" type="number" [(ngModel)]="tiendaPrice" placeholder="0.00" min="0" />
-        <button class="btn-add" (click)="addTiendaItem()">+ Agregar</button>
+        <label class="field-label tienda-label"><app-icon name="tienda"></app-icon> Precio del producto en Tienda</label>
+        <input class="field-input big-input" type="number" [(ngModel)]="tiendaPrice" placeholder="0.00" min="0.1" />
+        <button class="btn-add" (click)="addTiendaItem()" [disabled]="tiendaPrice <= 0">+ Agregar</button>
     </div>
   
    
@@ -64,7 +71,7 @@
     <div class="cart-section">
         <h3 class="section-label">Pedido</h3>
         <div class="cart-list">
-            @for (item of cart(); track item.productId) {
+            @for (item of cart(); track $index) {
             <div class="cart-item">
                 <div class="cart-item-info">
                     <span class="cart-item-name">{{ item.productName }}</span>
@@ -84,7 +91,7 @@
         </div>
 
         <div class="btn-row">
-            <button class="btn-ghost" (click)="datosClienteVisible.set(false)">Cancelar</button>
+            <button class="btn-ghost" (click)="onCancel()">Cancelar</button>
             <button class="btn-primary ola" (click)="datosClienteVisible.set(true)" [disabled]="cart().length == 0">
                 Continuar
             </button>
@@ -96,7 +103,7 @@
         <div class="modal-overlay">
             <div class="customer-section">
                 <h3 class="section-label">Cliente</h3>
-
+                
                 <div class="field">
                     <label class="field-label">Nombre del cliente</label>
                     <input class="field-input" type="text" [(ngModel)]="orderData.customerName"
@@ -136,19 +143,31 @@
                     </button>
                 </div>
 
-                @if (orderError()) {
-                <p class="error-msg">{{ orderError() }}</p>
-                }
-                @if (orderSuccess()) {
-                <p class="success-msg">✓ Orden creada correctamente</p>
+                @if(orderData.paymentMethod == 'cash'){
+                    <div class="field">
+                        <label class="field-label">Efectivo</label>
+                        <input class="field-input" type="number" [(ngModel)]="cashPayed" placeholder="0"  min="0"/>
+                    </div>
+                    <span class="sugg-cat modal-text">Cambio: {{ cashPayed() - cartTotal() | currency:'MXN':'symbol':'1.2-2' }}</span>
                 }
 
-                <button class="btn-primary" (click)="submitOrder()" [disabled]="orderSaving()">
-                    @if (orderSaving()) { <span class="spinner-sm"></span> } @else { Confirmar orden }
-                </button>
+                <span class="total-amount modal-text">Total: {{ cartTotal() | currency:'MXN':'symbol':'1.2-2' }}</span>
+                
+                <div class="btn-row">
+                    <button class="btn-ghost" (click)="datosClienteVisible.set(false)">Cancelar</button>
+                    <button class="btn-primary" (click)="submitOrder()" [disabled]="orderSaving() || !canConfirmOrder()">
+                        @if (orderSaving()) { <span class="spinner-sm"></span> } @else { Confirmar orden }
+                    </button>
+                </div>
+                
             </div>
         </div>
     }
-    
+    @if (orderError()) {
+        <p class="error-msg">{{ orderError() }}</p>
+    }
+    @if (orderSuccess()) {
+        <p class="success-msg">✓ Orden creada correctamente</p>
+    }
     }
 </div>

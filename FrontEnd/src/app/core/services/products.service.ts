@@ -19,7 +19,7 @@ export class ProductsService {
   constructor(private api: ApiService) {}
 
   // ── GET /products ─────────────────────────────────────────────────────────
-  getProducts(filters?: { department?: Department; category?: Category; search?: string }): Observable<Product[]> {
+  getProducts(filters?: { category?: Category; search?: string }): Observable<Product[]> {
     const params = new URLSearchParams();
     if (filters?.category)   params.set('category', filters.category);
     if (filters?.search)     params.set('search', filters.search);

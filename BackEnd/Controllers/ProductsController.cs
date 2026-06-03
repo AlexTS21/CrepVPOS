@@ -26,6 +26,9 @@ public class ProductsController(AppDbContext db) : ControllerBase
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(p => p.Name.ToLower().Contains(search.ToLower()));
 
+        //Just Creperia 
+        query = query.Where(p => p.Department == Department.creperia);
+
         var products = await query
             .OrderBy(p => p.Category)
             .ThenBy(p => p.Name)

@@ -265,6 +265,10 @@
     font-weight: 800;
 }
 
+.modal-text {
+    text-align: end;
+}
+
 .btn-row {
     display: flex;
     gap: 0.75rem;
@@ -303,6 +307,11 @@
     overflow: auto;
  } 
 
+.tienda-label{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 
  .consume-type {
      display: flex;

@@ -41,6 +41,8 @@ export class PosComponent implements OnInit {
   apertura = this.cajaService.activeApertura;
   dept = signal<Department>('creperia');
 
+  tiendaIds: number = -1;
+
   allProducts = signal<Product[]>([]);
   searchQuery = '';
   suggestions = signal<Product[]>([]);
@@ -51,6 +53,7 @@ export class PosComponent implements OnInit {
 
   cart = signal<CartItem[]>([]);
   cartTotal = computed(() => this.cart().reduce((s, i) => s + i.subtotal, 0));
+  cashPayed = signal<number>(0);
 
   datosClienteVisible = signal<boolean>(false);
 
@@ -67,27 +70,44 @@ export class PosComponent implements OnInit {
 
   ngOnInit() {
     this.loadProducts();
-  }
-
+    this.cajaService.loadActiveApertura().subscribe();
+   }
 
   // SERVICIO: ProductsService.getProducts() — GET /products?department=:dept
   loadProducts() {
-    this.productsService.getProducts({ department: this.dept() }).subscribe({
+    this.productsService.getProducts(  {category: this.filterCat as Category || undefined} ).subscribe({
       next: (products) => {
         this.allProducts.set(products);
-        this.suggestions.set(products.slice(0,5))
+        this.suggestions.set(products.slice(0,4))
       } 
     });
   }
 
+  canConfirmOrder(){
+
+    if(this.orderData.customerName == '') return false;
+    if(this.orderData.paymentMethod == 'cash'){
+      if(this.cashPayed() - this.cartTotal() < 0 ) return false;
+    }
+    if(this.orderData.consumeType == 'dine_in'){
+      if(this.orderData.tableNumber == '') return false;
+    }
+
+    return true;
+  }
+
   onSearch() {
     const q = this.searchQuery.toLowerCase().trim();
-    if (!q) { this.suggestions.set([]); return; }
+    if (!q) { return; }
     // SERVICIO: ProductsService.getProducts() — GET /products?department=creperia&search=:q
     // Para demo usamos filtro local; reemplazar con: this.productsService.getProducts({ department: 'creperia', search: q })
     this.suggestions.set(
       this.allProducts().filter(p => p.name.toLowerCase().includes(q) && p.available).slice(0, 6)
     );
+  }
+
+  onCancel(){
+    this.cart.set([]);
   }
 
   addToCart(product: Product) {
@@ -109,14 +129,13 @@ export class PosComponent implements OnInit {
       }]);
     }
     this.searchQuery = '';
-    this.suggestions.set([]);
     console.log(this.cart().length)
   }
 
   addTiendaItem() {
     if (this.tiendaPrice <= 0) return;
     this.cart.update(items => [...items, {
-      productId: 17, //Importat change the id corresponding the tienda product
+      productId: (--this.tiendaIds) * - 1, //Importat change the id corresponding the tienda product
       productName: 'Tienda',
       quantity: 1,
       unitPrice: this.tiendaPrice,
@@ -180,6 +199,7 @@ export class PosComponent implements OnInit {
 
     this.ordersService.createOrder(req).subscribe({
       next: () => {
+        this.datosClienteVisible.set(false);
         this.orderSaving.set(false);
         this.orderSuccess.set(true);
         this.cart.set([]);
@@ -187,6 +207,7 @@ export class PosComponent implements OnInit {
         setTimeout(() => this.orderSuccess.set(false), 3000);
       },
       error: () => {
+        this.datosClienteVisible.set(false);
         this.orderError.set('Error al crear la orden');
         this.orderSaving.set(false);
       },
