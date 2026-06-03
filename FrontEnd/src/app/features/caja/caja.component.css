@@ -184,26 +184,7 @@
     flex: 1;
 }
 
-.btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: opacity 0.15s;
 
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-}
 
 .btn-danger {
     background: var(--danger);

@@ -47,8 +47,6 @@ public class OrdersController(AppDbContext db) : ControllerBase
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderRequest req)
     {
         // Validar que existe apertura activa para ese departamento
-        if (!Enum.TryParse<Department>(req.Department, out var dept))
-            return BadRequest("Departamento inválido");
         if (!Enum.TryParse<ConsumeType>(req.ConsumeType, out var consumeType))
             return BadRequest("Tipo de consumo inválido");
         if (!Enum.TryParse<PaymentMethod>(req.PaymentMethod, out var paymentMethod))
@@ -94,7 +92,6 @@ public class OrdersController(AppDbContext db) : ControllerBase
         var order = new Order
         {
             AperturaId    = req.AperturaId,
-            Department    = dept,
             CustomerName  = req.CustomerName,
             ConsumeType   = consumeType,
             TableNumber   = consumeType == ConsumeType.dine_in ? req.TableNumber : null,
@@ -136,12 +133,11 @@ public class OrdersController(AppDbContext db) : ControllerBase
     private static OrderDto Map(Order o) => new(
         o.Id,
         o.AperturaId,
-        o.Department.ToString(),
         o.CustomerName,
         o.ConsumeType.ToString(),
         o.TableNumber,
         o.Items.Select(i => new OrderItemDto(
-            i.ProductId, i.ProductName, i.Quantity, i.UnitPrice, i.Subtotal
+            i.ProductId,  i.ProductName, i.Department.ToString(), i.Quantity, i.UnitPrice, i.Subtotal
         )).ToList(),
         o.Total,
         o.PaymentMethod.ToString(),

@@ -70,3 +70,26 @@ input[type=number] { -moz-appearance: textfield; }
 
 /* ── Date input fix ─────────────────────────────────────────────────────── */
 input[type=date] { color-scheme: light dark; }
+
+
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: opacity 0.15s;   
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

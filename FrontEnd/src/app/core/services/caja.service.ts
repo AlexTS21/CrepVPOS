@@ -19,7 +19,7 @@ export class CajaService {
 
   constructor(private api: ApiService) {}
 
-  // ── GET /caja/apertura/active?department=:dept ────────────────────────────
+  // ── GET /caja/apertura/active ────────────────────────────
   loadActiveApertura(): Observable<Apertura | null> {
     return this.api.get<Apertura | null>(`/caja/apertura/active`).pipe(
       tap(a => this.activeApertura.set(a))

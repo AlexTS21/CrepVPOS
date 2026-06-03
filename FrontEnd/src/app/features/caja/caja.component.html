@@ -26,6 +26,22 @@
                 <span class="info-key">Efectivo inicial Tienda</span>
                 <span class="info-val">{{ apertura()!.tiendaOpeningCash | currency:'MXN':'symbol':'1.2-2' }}</span>
             </div>
+            <div class="info-row">
+                <span class="info-key">Ventas efectivo</span>
+                <span class="info-val">{{ apertura()!.cashSales| currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Ventas tarjeta</span>
+                <span class="info-val">{{ apertura()!.cardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Ventas efectivo Tienda</span>
+                <span class="info-val">{{ apertura()!.tiendaCashSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Ventas tarjeta Tienda</span>
+                <span class="info-val">{{ apertura()!.tiendaCardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+            </div>
         </div>
     </div>
 
@@ -42,8 +58,8 @@
         </div>
 
         <div class="field">
-            <label class="field-label">Ventas con tarjeta</label>
-            <input class="field-input" type="number" [(ngModel)]="corteData.cardSales" placeholder="0.00" min="0" />
+            <label class="field-label">Efectivo en tienda</label>
+            <input class="field-input" type="number" [(ngModel)]="corteData.tiendaClosingCash" placeholder="0.00" min="0" />
         </div>
 
         @if (corteError()) {
@@ -52,7 +68,7 @@
 
         <div class="btn-row">
             <button class="btn-ghost" (click)="corteVisible.set(false)">Cancelar</button>
-            <button class="btn-primary" (click)="realizarCorte()" [disabled]="corteSaving()">
+            <button class="btn-primary" (click)="realizarCorte()" [disabled]="corteSaving() || !isCashComplete()">
                 @if (corteSaving()) { <span class="spinner-sm"></span> } @else { Confirmar corte }
             </button>
         </div>

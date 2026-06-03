@@ -17,7 +17,7 @@ public class CajaController(AppDbContext db) : ControllerBase
         ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value
         ?? "0");
 
-    // GET /api/caja/apertura/active?department=creperia
+    // GET /api/caja/apertura/active
     [HttpGet("apertura/active")]
     public async Task<ActionResult<AperturaDto?>> GetActiveApertura()
     {
@@ -25,8 +25,37 @@ public class CajaController(AppDbContext db) : ControllerBase
             .FirstOrDefaultAsync(a => a.Status == CajaStatus.open);
 
         if (apertura is null) return Ok(null);
+        
+        var cashSales = await db.OrderItems
+        .Where(i =>
+            i.Order!.AperturaId == apertura.Id &&
+            i.Order.PaymentMethod == PaymentMethod.cash &&
+            i.Department == Department.creperia)
+        .SumAsync(i => i.Subtotal);
 
-        return Ok(MapApertura(apertura));
+        var tiendaCashSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.cash &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
+
+
+        var cardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.creperia)
+            .SumAsync(i => i.Subtotal);
+
+        var tiendaCardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
+
+        return Ok(MapApertura(apertura, cashSales, cardSales, tiendaCashSales, tiendaCardSales));
     }
 
     // POST /api/caja/apertura
@@ -53,7 +82,7 @@ public class CajaController(AppDbContext db) : ControllerBase
         db.Aperturas.Add(apertura);
         await db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetActiveApertura), MapApertura(apertura));
+        return CreatedAtAction(nameof(GetActiveApertura), MapApertura(apertura, 0,0,0,0));
     }
 
     // POST /api/caja/corte
@@ -67,26 +96,34 @@ public class CajaController(AppDbContext db) : ControllerBase
         if (apertura is null)
             return NotFound(new { message = "Apertura no encontrada o ya cerrada" });
 
-        // Calcular ventas en efectivo desde las órdenes
-        var cashSales = apertura.Orders
-            .Where(o => o.PaymentMethod == PaymentMethod.cash && o.Department == Department.creperia)
-            .Sum(o => o.Total);
+       var cashSales = await db.OrderItems
+        .Where(i =>
+            i.Order!.AperturaId == apertura.Id &&
+            i.Order.PaymentMethod == PaymentMethod.cash &&
+            i.Department == Department.creperia)
+        .SumAsync(i => i.Subtotal);
 
-        // Calcular ventas TIENDA en efectivo desde las órdenes
-        var cardSales = apertura.Orders
-            .Where(o => o.PaymentMethod == PaymentMethod.card && o.Department == Department.creperia)
-            .Sum(o => o.Total);
+        var tiendaCashSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.cash &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
 
-        
-        // Calcular ventas en efectivo desde las órdenes
-        var tiendaCashSales = apertura.Orders
-            .Where(o => o.PaymentMethod == PaymentMethod.cash && o.Department == Department.tienda)
-            .Sum(o => o.Total);
 
-        // Calcular ventas TIENDA en efectivo desde las órdenes
-        var tiendaCardSales = apertura.Orders
-            .Where(o => o.PaymentMethod == PaymentMethod.card && o.Department == Department.tienda)
-            .Sum(o => o.Total);
+        var cardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.creperia)
+            .SumAsync(i => i.Subtotal);
+
+        var tiendaCardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == apertura.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
 
         
         //Calculate Card sales 
@@ -134,12 +171,15 @@ public class CajaController(AppDbContext db) : ControllerBase
         return Ok(MapCorte(corte));
     }
 
+
     // ── Mappers ───────────────────────────────────────────────────────────────
 
-    private static AperturaDto MapApertura(Apertura a) => new(
+    private static AperturaDto MapApertura(Apertura a, decimal cashSales, decimal cardSales, decimal tiendaCashSales, decimal tiendaCardSales) => new(
         a.Id, a.OpenedBy,
-        a.OpenedAt, a.OpeningCash, a.TiendaOpeningCash, a.Status.ToString()
+        a.OpenedAt, a.OpeningCash, a.TiendaOpeningCash, a.Status.ToString(), 
+        cashSales, cardSales, tiendaCashSales, tiendaCardSales
     );
+
 
     private static CorteDto MapCorte(Corte c) => new(
         c.Id, c.AperturaId, c.ClosedBy,

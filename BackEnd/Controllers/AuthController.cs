@@ -23,7 +23,7 @@ public class AuthController(AppDbContext db, ITokenService tokenService) : Contr
             return Unauthorized(new { message = "Credenciales incorrectas" });
 
         var token = tokenService.GenerateToken(user);
-        var dto = new UserDto(user.Id, user.Username, user.Role.ToString(), user.Department.ToString());
+        var dto = new UserDto(user.Id, user.Username, user.Role.ToString());
 
         return Ok(new LoginResponse(dto, token));
     }
@@ -45,6 +45,6 @@ public class AuthController(AppDbContext db, ITokenService tokenService) : Contr
         var user = await db.Users.FindAsync(userId);
         if (user is null) return NotFound();
 
-        return Ok(new UserDto(user.Id, user.Username, user.Role.ToString(), user.Department.ToString()));
+        return Ok(new UserDto(user.Id, user.Username, user.Role.ToString()));
     }
 }

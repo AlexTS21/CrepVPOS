@@ -18,14 +18,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // Enums stored as strings for readability
         mb.Entity<User>().Property(u => u.Role).HasConversion<string>();
-        mb.Entity<User>().Property(u => u.Department).HasConversion<string>();
         mb.Entity<Apertura>().Property(a => a.Status).HasConversion<string>();
         mb.Entity<Product>().Property(p => p.Category).HasConversion<string>();
         mb.Entity<Product>().Property(p => p.Department).HasConversion<string>();
-        mb.Entity<Order>().Property(o => o.Department).HasConversion<string>();
         mb.Entity<Order>().Property(o => o.ConsumeType).HasConversion<string>();
         mb.Entity<Order>().Property(o => o.PaymentMethod).HasConversion<string>();
         mb.Entity<Order>().Property(o => o.Status).HasConversion<string>();
+        mb.Entity<OrderItem>().Property(o => o.Department).HasConversion<string>();
 
         mb.Entity<Corte>()
         .HasOne(c => c.ClosedByUser)
@@ -78,7 +77,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 // Password: admin123
                 PasswordHash = "$2a$11$Jvy3l91RFVq5528881is0upgH6fhMVb4Q4Ogq1Jx8U9Y51RkLiaq2",
                 Role = UserRole.admin,
-                Department = Department.creperia
             },
             new User
             {
@@ -87,7 +85,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 // Password: seller123
                 PasswordHash = "$2a$11$Ty4.UhT3RQJW1i.pOGFmCORnOTCi4allN94lww/DjmsO3p45ATKTa",
                 Role = UserRole.seller,
-                Department = Department.creperia
             }
         );
 

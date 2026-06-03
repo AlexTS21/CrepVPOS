@@ -25,6 +25,10 @@ export interface Apertura {
   openingCash: number;      // Efectivo inicial
   tiendaOpeningCash: number;
   status: CajaStatus;
+  cashSales: number,
+  cardSales: number,
+  tiendaCashSales: number, 
+  tiendaCardSales: number
 }
 
 export interface Corte {

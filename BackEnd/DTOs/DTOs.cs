@@ -15,8 +15,7 @@ public record LoginResponse(UserDto User, string Token);
 public record UserDto(
     int Id,
     string Username,
-    string Role,
-    string Department
+    string Role
 );
 
 // ─── Caja ─────────────────────────────────────────────────────────────────────
@@ -39,7 +38,11 @@ public record AperturaDto(
     DateTime OpenedAt,
     decimal OpeningCash,
     decimal TiendaOpeningCash,
-    string Status
+    string Status,
+    decimal CashSales,
+    decimal CardSales,
+    decimal TiendaCashSales, 
+    decimal TiendaCardSales
 );
 
 public record CorteDto(
@@ -88,7 +91,6 @@ public record OrderItemRequest(
 
 public record OrderRequest(
     int AperturaId,
-    [Required] string Department,
     [Required] string CustomerName,
     [Required] string ConsumeType,
     string? TableNumber,
@@ -101,6 +103,7 @@ public record OrderStatusRequest([Required] string Status);
 public record OrderItemDto(
     int ProductId,
     string ProductName,
+    string Department,
     int Quantity,
     decimal UnitPrice,
     decimal Subtotal
@@ -109,7 +112,6 @@ public record OrderItemDto(
 public record OrderDto(
     int Id,
     int AperturaId,
-    string Department,
     string CustomerName,
     string ConsumeType,
     string? TableNumber,

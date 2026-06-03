@@ -28,8 +28,6 @@ public class User
 
     public UserRole Role { get; set; }
 
-    public Department Department { get; set; }
-
     // Navigation
     public ICollection<Apertura> Aperturas { get; set; } = [];
     public ICollection<Order> Orders { get; set; } = [];
@@ -140,8 +138,6 @@ public class Order
     [ForeignKey(nameof(AperturaId))]
     public Apertura? Apertura { get; set; }
 
-    public Department Department { get; set; }
-
     [Required, MaxLength(100)]
     public string CustomerName { get; set; } = string.Empty;
 
@@ -179,6 +175,8 @@ public class OrderItem
 
     [ForeignKey(nameof(OrderId))]
     public Order? Order { get; set; }
+
+    public Department Department { get; set; }
 
     public int ProductId { get; set; }
 

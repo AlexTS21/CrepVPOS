@@ -29,7 +29,7 @@ export class CajaComponent implements OnInit {
   corteVisible = signal(false);
   corteSaving = signal(false);
   corteError = signal('');
-  corteData = { closingCash: 0, cardSales: 0, tiendaClosingCash: 0};
+  corteData = { closingCash: 0, tiendaClosingCash: 0};
   lastCorte = signal<Corte | null>(null);
 
   ngOnInit() {
@@ -74,6 +74,13 @@ export class CajaComponent implements OnInit {
     });
   }
 
+  isCashComplete(): boolean{
+    if(!this.apertura()) return false;
+    if(this.corteData.closingCash < this.apertura()!.cashSales + this.apertura()!.openingCash) return false;
+    if(this.corteData.tiendaClosingCash < this.apertura()!.tiendaCashSales  + this.apertura()!.tiendaOpeningCash) return false;
+    return true;
+  }
+
   // SERVICIO: CajaService.closeCaja() — POST /caja/corte
   realizarCorte() {
     if (this.corteData.closingCash < 0) {
@@ -86,13 +93,13 @@ export class CajaComponent implements OnInit {
     this.cajaService.closeCaja({
       aperturaId,
       closingCash: this.corteData.closingCash,
-      tiendaClosingCash: this.corteData.cardSales,
+      tiendaClosingCash: this.corteData.tiendaClosingCash,
     }).subscribe({
       next: (corte) => {
         this.lastCorte.set(corte);
         this.corteSaving.set(false);
         this.corteVisible.set(false);
-        this.corteData = { closingCash: 0, cardSales: 0, tiendaClosingCash: 0 };
+        this.corteData = { closingCash: 0, tiendaClosingCash: 0 };
       },
       error: () => {
         this.corteError.set('Error al realizar corte');
