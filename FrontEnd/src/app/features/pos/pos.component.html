@@ -42,7 +42,7 @@
             @for (p of suggestions(); track p.id) {
             <div class="suggestion-item" (click)="addToCart(p)">
                 <div class="sugg-info">
-                    <span class="sugg-name">{{ p.name }}</span>
+                    <span class="sugg-name"> <app-icon [name]="p.category" ></app-icon> {{ p.name }}</span>
                     <span class="sugg-cat">{{ categoryLabel(p.category) }}</span>
                 </div>
                 <span class="sugg-price">{{ p.price | currency:'MXN':'symbol':'1.2-2' }}</span>
@@ -74,7 +74,12 @@
             @for (item of cart(); track $index) {
             <div class="cart-item">
                 <div class="cart-item-info">
-                    <span class="cart-item-name">{{ item.productName }}</span>
+                    @if(item.department == 'creperia'){
+                        <span class="cart-item-name"><app-icon [name]="item.category" ></app-icon> {{ item.productName }}</span>
+                    }@else{
+                        <span class="cart-item-name"><app-icon name="tienda" ></app-icon> {{ item.productName }}</span>
+
+                    }
                     <span class="cart-item-price">{{ item.unitPrice | currency:'MXN':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="cart-qty">

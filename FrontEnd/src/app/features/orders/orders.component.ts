@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { OrdersService } from '../../core/services/orders.service';
 import { CajaService } from '../../core/services/caja.service';
 import { Order, OrderStatus } from '../../core/models';
+import { IconComponent } from "../../../shared/icon/app-icon.component";
 
 // SERVICIO: OrdersService — ver /core/services/orders.service.ts
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: 'orders.component.html',
   styleUrl: 'orders.component.css',
 })

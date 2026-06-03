@@ -96,6 +96,7 @@ export interface OrderItem {
   unitPrice: number;
   subtotal: number;
   department: Department;
+  category: Category;
 }
 
 export interface Order {

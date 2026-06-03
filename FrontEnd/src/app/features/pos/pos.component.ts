@@ -126,6 +126,7 @@ export class PosComponent implements OnInit {
         unitPrice: product.price,
         subtotal: product.price,
         department: product.department,
+        category: product.category
       }]);
     }
     this.searchQuery = '';
@@ -141,7 +142,8 @@ export class PosComponent implements OnInit {
       unitPrice: this.tiendaPrice,
       subtotal: this.tiendaPrice,
       customPrice: this.tiendaPrice,
-      department: 'tienda'
+      department: 'tienda',
+      category: 'extras'
     }]);
     this.tiendaPrice = 0;
   }

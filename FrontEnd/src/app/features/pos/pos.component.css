@@ -117,6 +117,8 @@
 }
 
 .sugg-name {
+    display: flex;
+    gap: 5px;
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text);
@@ -208,6 +210,8 @@
 }
 
 .cart-item-name {
+    display: flex;
+    gap: 5px;
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text);
