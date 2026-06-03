@@ -95,6 +95,7 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  department: Department;
 }
 
 export interface Order {
@@ -115,11 +116,10 @@ export interface Order {
 
 export interface OrderRequest {
   aperturaId: number;
-  department: Department;
   customerName: string;
   consumeType: ConsumeType;
   tableNumber?: string;
-  items: { productId: number; quantity: number; customPrice?: number }[];
+  items: { productId: number; quantity: number; customPrice?: number, department: string }[];
   paymentMethod: PaymentMethod;
 }
 

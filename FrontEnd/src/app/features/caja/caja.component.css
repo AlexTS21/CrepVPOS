@@ -4,13 +4,7 @@
     margin: 0 auto;
 }
 
-.page-title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    margin: 0 0 1.25rem;
-}
+
 
 .dept-tabs {
     display: flex;
@@ -199,16 +193,6 @@
     transition: opacity 0.15s;
 }
 
-.btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.8rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-}
 
 .loading-state {
     display: flex;

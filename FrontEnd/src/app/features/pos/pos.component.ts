@@ -9,16 +9,26 @@ import {
   Product, CartItem, Department, PaymentMethod,
   ConsumeType, OrderRequest, Category
 } from '../../core/models';
+import { IconComponent } from "../../../shared/icon/app-icon.component";
 
 // SERVICIOS:
 //   ProductsService.getProducts()  — GET /products
 //   OrdersService.createOrder()    — POST /orders
 //   CajaService.activeApertura     — estado local (cargado en CajaComponent)
 
+const CATEGORIES: { value: Category; label: string }[] = [
+  { value: 'bebidas_frias',     label: 'Bebidas frías' },
+  { value: 'bebidas_calientes', label: 'Bebidas calientes' },
+  { value: 'salados',           label: 'Salados' },
+  { value: 'dulces',            label: 'Dulces' },
+  { value: 'extras',            label: 'Extras' },
+];
+
+
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, IconComponent],
   templateUrl: 'pos.component.html',
   styleUrl: 'pos.component.css',
 })
@@ -34,11 +44,15 @@ export class PosComponent implements OnInit {
   allProducts = signal<Product[]>([]);
   searchQuery = '';
   suggestions = signal<Product[]>([]);
+  filterCat = '';
+  categories = CATEGORIES;
 
   tiendaPrice = 0;
 
   cart = signal<CartItem[]>([]);
   cartTotal = computed(() => this.cart().reduce((s, i) => s + i.subtotal, 0));
+
+  datosClienteVisible = signal<boolean>(false);
 
   orderData: {
     customerName: string;
@@ -55,13 +69,6 @@ export class PosComponent implements OnInit {
     this.loadProducts();
   }
 
-  setDept(d: Department) {
-    this.dept.set(d);
-    this.cart.set([]);
-    this.searchQuery = '';
-    this.suggestions.set([]);
-    this.loadProducts();
-  }
 
   // SERVICIO: ProductsService.getProducts() — GET /products?department=:dept
   loadProducts() {
@@ -98,22 +105,24 @@ export class PosComponent implements OnInit {
         quantity: 1,
         unitPrice: product.price,
         subtotal: product.price,
+        department: product.department,
       }]);
     }
     this.searchQuery = '';
     this.suggestions.set([]);
+    console.log(this.cart().length)
   }
 
   addTiendaItem() {
     if (this.tiendaPrice <= 0) return;
-    const ts = Date.now();
     this.cart.update(items => [...items, {
-      productId: ts,
+      productId: 17, //Importat change the id corresponding the tienda product
       productName: 'Tienda',
       quantity: 1,
       unitPrice: this.tiendaPrice,
       subtotal: this.tiendaPrice,
       customPrice: this.tiendaPrice,
+      department: 'tienda'
     }]);
     this.tiendaPrice = 0;
   }
@@ -157,7 +166,6 @@ export class PosComponent implements OnInit {
     this.orderSaving.set(true);
     const req: OrderRequest = {
       aperturaId: this.apertura()!.id,
-      department: this.dept(),
       customerName: this.orderData.customerName,
       consumeType: this.orderData.consumeType,
       tableNumber: this.orderData.consumeType === 'dine_in' ? this.orderData.tableNumber : undefined,
@@ -165,6 +173,7 @@ export class PosComponent implements OnInit {
         productId: c.productId,
         quantity: c.quantity,
         customPrice: c.customPrice,
+        department: c.department
       })),
       paymentMethod: this.orderData.paymentMethod,
     };

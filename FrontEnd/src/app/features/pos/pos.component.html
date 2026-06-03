@@ -1,20 +1,20 @@
 <div class="pos-page">
+
+    <h2 class="page-title">Ventas</h2>
+
     <!-- Sin apertura -->
     @if (!apertura()) {
     <div class="empty-state">
-        <span class="empty-icon">🔒</span>
+        <span> <app-icon name="lock"></app-icon></span>
         <p>No hay caja abierta.<br />Realiza una apertura primero.</p>
     </div>
     } @else {
+        
 
-    <!-- Dept tabs -->
-    <div class="dept-tabs">
-        <button class="dept-tab" [class.active]="dept() === 'creperia'" (click)="setDept('creperia')">Crepería</button>
-        <button class="dept-tab" [class.active]="dept() === 'tienda'" (click)="setDept('tienda')">Tienda</button>
-    </div>
+    
 
     <!-- Busqueda de productos -->
-    @if (dept() === 'creperia') {
+  
     <div class="search-wrap">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="11" cy="11" r="8" />
@@ -23,6 +23,17 @@
         <input class="search-input" type="text" [(ngModel)]="searchQuery" (input)="onSearch()"
             placeholder="Buscar producto..." />
     </div>
+
+    <div class="filter-row">
+        <select class="filter-select" [(ngModel)]="filterCat" (change)="loadProducts()">
+            <option value="">Todas las categorías</option>
+            @for (c of categories; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+            }
+        </select>
+    </div>
+
+    
 
     <!-- Sugerencias -->
     @if (suggestions().length > 0) {
@@ -38,17 +49,18 @@
         }
     </div>
     }
-    } @else {
-    <!-- Tienda: precio libre -->
+
+     <!-- Tienda: precio libre -->
     <div class="tienda-price-card">
-        <label class="field-label">Precio del producto</label>
+        <label class="field-label">Precio del producto en Tienda</label>
         <input class="field-input big-input" type="number" [(ngModel)]="tiendaPrice" placeholder="0.00" min="0" />
         <button class="btn-add" (click)="addTiendaItem()">+ Agregar</button>
     </div>
-    }
+  
+   
+    
 
     <!-- Carrito -->
-    @if (cart().length > 0) {
     <div class="cart-section">
         <h3 class="section-label">Pedido</h3>
         <div class="cart-list">
@@ -70,62 +82,73 @@
             <span>Total</span>
             <span class="total-amount">{{ cartTotal() | currency:'MXN':'symbol':'1.2-2' }}</span>
         </div>
-    </div>
 
-    <!-- Datos del cliente -->
-    <div class="customer-section">
-        <h3 class="section-label">Cliente</h3>
-
-        <div class="field">
-            <label class="field-label">Nombre del cliente</label>
-            <input class="field-input" type="text" [(ngModel)]="orderData.customerName"
-                placeholder="¿A nombre de quién?" />
-        </div>
-
-        <div class="consume-type">
-            <button class="consume-btn" [class.active]="orderData.consumeType === 'dine_in'"
-                (click)="orderData.consumeType = 'dine_in'">Aquí</button>
-            <button class="consume-btn" [class.active]="orderData.consumeType === 'takeout'"
-                (click)="orderData.consumeType = 'takeout'">Para llevar</button>
-        </div>
-
-        @if (orderData.consumeType === 'dine_in') {
-        <div class="field">
-            <label class="field-label">Mesa</label>
-            <input class="field-input" type="text" [(ngModel)]="orderData.tableNumber" placeholder="Ej: 4" />
-        </div>
-        }
-
-        <div class="payment-row">
-            <button class="pay-btn" [class.active]="orderData.paymentMethod === 'cash'"
-                (click)="orderData.paymentMethod = 'cash'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <rect x="2" y="6" width="20" height="12" rx="2" />
-                    <circle cx="12" cy="12" r="3" />
-                </svg>
-                Efectivo
-            </button>
-            <button class="pay-btn" [class.active]="orderData.paymentMethod === 'card'"
-                (click)="orderData.paymentMethod = 'card'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <rect x="2" y="5" width="20" height="14" rx="2" />
-                    <line x1="2" y1="10" x2="22" y2="10" />
-                </svg>
-                Tarjeta
+        <div class="btn-row">
+            <button class="btn-ghost" (click)="datosClienteVisible.set(false)">Cancelar</button>
+            <button class="btn-primary ola" (click)="datosClienteVisible.set(true)" [disabled]="cart().length == 0">
+                Continuar
             </button>
         </div>
-
-        @if (orderError()) {
-        <p class="error-msg">{{ orderError() }}</p>
-        }
-        @if (orderSuccess()) {
-        <p class="success-msg">✓ Orden creada correctamente</p>
-        }
-
-        <button class="btn-primary" (click)="submitOrder()" [disabled]="orderSaving()">
-            @if (orderSaving()) { <span class="spinner-sm"></span> } @else { Confirmar orden }
-        </button>
     </div>
+
+    @if(datosClienteVisible()){
+        <!-- Datos del cliente -->
+        <div class="modal-overlay">
+            <div class="customer-section">
+                <h3 class="section-label">Cliente</h3>
+
+                <div class="field">
+                    <label class="field-label">Nombre del cliente</label>
+                    <input class="field-input" type="text" [(ngModel)]="orderData.customerName"
+                        placeholder="¿A nombre de quién?" />
+                </div>
+
+                <div class="consume-type">
+                    <button class="consume-btn" [class.active]="orderData.consumeType === 'dine_in'"
+                        (click)="orderData.consumeType = 'dine_in'">Aquí</button>
+                    <button class="consume-btn" [class.active]="orderData.consumeType === 'takeout'"
+                        (click)="orderData.consumeType = 'takeout'">Para llevar</button>
+                </div>
+
+                @if (orderData.consumeType === 'dine_in') {
+                <div class="field">
+                    <label class="field-label">Mesa</label>
+                    <input class="field-input" type="text" [(ngModel)]="orderData.tableNumber" placeholder="Ej: 4" />
+                </div>
+                }
+
+                <div class="payment-row">
+                    <button class="pay-btn" [class.active]="orderData.paymentMethod === 'cash'"
+                        (click)="orderData.paymentMethod = 'cash'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="2" y="6" width="20" height="12" rx="2" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Efectivo
+                    </button>
+                    <button class="pay-btn" [class.active]="orderData.paymentMethod === 'card'"
+                        (click)="orderData.paymentMethod = 'card'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>
+                        Tarjeta
+                    </button>
+                </div>
+
+                @if (orderError()) {
+                <p class="error-msg">{{ orderError() }}</p>
+                }
+                @if (orderSuccess()) {
+                <p class="success-msg">✓ Orden creada correctamente</p>
+                }
+
+                <button class="btn-primary" (click)="submitOrder()" [disabled]="orderSaving()">
+                    @if (orderSaving()) { <span class="spinner-sm"></span> } @else { Confirmar orden }
+                </button>
+            </div>
+        </div>
     }
+    
     }
 </div>

@@ -46,6 +46,8 @@ public class OrdersController(AppDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderRequest req)
     {
+
+        Console.WriteLine(req.ConsumeType);
         // Validar que existe apertura activa para ese departamento
         if (!Enum.TryParse<ConsumeType>(req.ConsumeType, out var consumeType))
             return BadRequest("Tipo de consumo inválido");
@@ -83,6 +85,7 @@ public class OrdersController(AppDbContext db) : ControllerBase
             {
                 ProductId   = itemReq.ProductId,
                 ProductName = product?.Name ?? "Producto",
+                Department  = itemReq.Department,
                 Quantity    = itemReq.Quantity,
                 UnitPrice   = unitPrice,
                 Subtotal    = subtotal

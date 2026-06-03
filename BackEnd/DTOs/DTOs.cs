@@ -86,7 +86,8 @@ public record ProductDto(
 public record OrderItemRequest(
     int ProductId,
     [Range(1, int.MaxValue)] int Quantity,
-    decimal? CustomPrice
+    decimal? CustomPrice,
+    Department Department
 );
 
 public record OrderRequest(
