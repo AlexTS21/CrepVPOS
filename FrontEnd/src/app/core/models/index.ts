@@ -134,6 +134,10 @@ export interface DayCycleReport {
   totalCashSales: number;
   totalCardSales: number;
   grandTotal: number;
+  tiendaTotalCashSales: number;
+  tiendaTotalCardSales: number;
+  tiendaGrandTotal: number;
+  allGrandTotal: number;
   date: string;
 }
 

@@ -176,9 +176,15 @@
  }
 
  .cycle-total {
+  display: flex;
+  gap: 5px;
    font-size: 0.95rem;
    font-weight: 800;
    color: var(--accent);
+ }
+
+ app-icon{
+  color: var(--accent);
  }
 
  .chevron {
@@ -208,11 +214,10 @@
  }
 
  .detail-label {
-   font-size: 0.65rem;
+   font-size: 0.85rem;
    font-weight: 700;
    text-transform: uppercase;
-   letter-spacing: 0.1em;
-   color: var(--text-muted);
+   color: var(--accent);
    margin-bottom: 0.2rem;
  }
 

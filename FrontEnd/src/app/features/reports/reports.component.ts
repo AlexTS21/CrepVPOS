@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportsService } from '../../core/services/reports.service';
 import { DayCycleReport, Department } from '../../core/models';
+import { IconComponent } from "../../../shared/icon/app-icon.component";
 
 // SERVICIO: ReportsService — ver /core/services/reports.service.ts
 // Ruta protegida con adminGuard en app.routes.ts
@@ -10,7 +11,7 @@ import { DayCycleReport, Department } from '../../core/models';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: 'reports.component.html',
   styleUrl: 'reports.component.css',
 })

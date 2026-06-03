@@ -1,94 +1,132 @@
-// using Microsoft.AspNetCore.Authorization;
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.EntityFrameworkCore;
-// using CafeCreperiaApi.Data;
-// using CafeCreperiaApi.DTOs;
-// using CafeCreperiaApi.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using CafeCreperiaApi.Data;
+using CafeCreperiaApi.DTOs;
+using CafeCreperiaApi.Models;
 
-// namespace CafeCreperiaApi.Controllers;
+namespace CafeCreperiaApi.Controllers;
 
-// [ApiController]
-// [Route("api/reports")]
-// [Authorize(Roles = "admin")]
-// public class ReportsController(AppDbContext db) : ControllerBase
-// {
-//     // GET /api/reports/cycles?department=creperia&from=2024-01-01&to=2024-12-31
-//     [HttpGet("cycles")]
-//     public async Task<ActionResult<List<DayCycleReportDto>>> GetCycles(
-//         [FromQuery] string? department,
-//         [FromQuery] string? from,
-//         [FromQuery] string? to)
-//     {
-//         // Solo los ciclos COMPLETOS (apertura + corte)
-//         var query = db.Aperturas
-//             .Include(a => a.Corte)
-//             .Include(a => a.Orders)
-//                 .ThenInclude(o => o.Items)
-//             .Where(a => a.Status == CajaStatus.closed && a.Corte != null)
-//             .AsQueryable();
+[ApiController]
+[Route("api/reports")]
+[Authorize(Roles = "admin")]
+public class ReportsController(AppDbContext db) : ControllerBase
+{
+    // GET /api/reports/cycles?from=2024-01-01&to=2024-12-31
+    [HttpGet("cycles")]
+    public async Task<ActionResult<List<DayCycleReportDto>>> GetCycles(
+        [FromQuery] string? from,
+        [FromQuery] string? to)
+    {
+        // Solo los ciclos COMPLETOS (apertura + corte)
+        var query = db.Aperturas
+            .Include(a => a.Corte)
+            .Include(a => a.Orders)
+                .ThenInclude(o => o.Items)
+            .Where(a => a.Status == CajaStatus.closed && a.Corte != null)
+            .AsQueryable();
 
-//         if (!string.IsNullOrWhiteSpace(department) && Enum.TryParse<Department>(department, out var dept))
-//             query = query.Where(a => a.Department == dept);
 
-//         if (DateTime.TryParse(from, out var fromDate))
-//             query = query.Where(a => a.OpenedAt >= fromDate);
+        if (DateTime.TryParse(from, out var fromDate))
+            query = query.Where(a => a.OpenedAt >= fromDate);
 
-//         if (DateTime.TryParse(to, out var toDate))
-//             query = query.Where(a => a.OpenedAt <= toDate.AddDays(1));
+        if (DateTime.TryParse(to, out var toDate))
+            query = query.Where(a => a.OpenedAt <= toDate.AddDays(1));
 
-//         var aperturas = await query
-//             .OrderByDescending(a => a.OpenedAt)
-//             .ToListAsync();
+        var aperturas = await query
+            .OrderByDescending(a => a.OpenedAt)
+            .ToListAsync();
 
-//         var result = aperturas.Select((a, idx) => BuildCycleReport(idx + 1, a)).ToList();
-//         return Ok(result);
-//     }
+        var tasks = aperturas
+            .Select((a, idx) => BuildCycleReport(idx + 1, a));
 
-//     // GET /api/reports/cycles/5
-//     [HttpGet("cycles/{id}")]
-//     public async Task<ActionResult<DayCycleReportDto>> GetCycle(int id)
-//     {
-//         var apertura = await db.Aperturas
-//             .Include(a => a.Corte)
-//             .Include(a => a.Orders)
-//                 .ThenInclude(o => o.Items)
-//             .FirstOrDefaultAsync(a => a.Id == id && a.Status == CajaStatus.closed && a.Corte != null);
+        var result = await Task.WhenAll(tasks);
+        return Ok(result);
+    }
 
-//         if (apertura is null) return NotFound();
+    // GET /api/reports/cycles/5
+    [HttpGet("cycles/{id}")]
+    public async Task<ActionResult<DayCycleReportDto>> GetCycle(int id)
+    {
+        var apertura = await db.Aperturas
+            .Include(a => a.Corte)
+            .Include(a => a.Orders)
+                .ThenInclude(o => o.Items)
+            .FirstOrDefaultAsync(a => a.Id == id && a.Status == CajaStatus.closed && a.Corte != null);
 
-//         return Ok(BuildCycleReport(id, apertura));
-//     }
 
-//     // ── Builder ───────────────────────────────────────────────────────────────
+        if (apertura is null) return NotFound();
+         var tasks = BuildCycleReport(id + 1, apertura);
 
-//     private static DayCycleReportDto BuildCycleReport(int reportId, Apertura a)
-//     {
-//         var corte = a.Corte!;
-//         var orders = a.Orders.ToList();
+        var result = await Task.WhenAll(tasks);
 
-//         var cashSales  = orders.Where(o => o.PaymentMethod == PaymentMethod.cash).Sum(o => o.Total);
-//         var cardSales  = orders.Where(o => o.PaymentMethod == PaymentMethod.card).Sum(o => o.Total);
-//         var grandTotal = cashSales + cardSales;
+        return Ok( result);
+    }
 
-//         return new DayCycleReportDto(
-//             Id:            reportId,
-//             Department:    a.Department.ToString(),
-//             Apertura:      new AperturaDto(a.Id, a.Department.ToString(), a.OpenedBy, a.OpenedAt, a.OpeningCash, a.Status.ToString()),
-//             Corte:         new CorteDto(corte.Id, corte.AperturaId, corte.Department.ToString(), corte.ClosedBy, corte.ClosedAt, corte.ClosingCash, corte.CardSales, corte.ExpectedCash, corte.Difference),
-//             Orders:        orders.Select(MapOrder).ToList(),
-//             TotalOrders:   orders.Count,
-//             TotalCashSales: cashSales,
-//             TotalCardSales: cardSales,
-//             GrandTotal:    grandTotal,
-//             Date:          a.OpenedAt.ToString("yyyy-MM-dd")
-//         );
-//     }
+    // ── Builder ───────────────────────────────────────────────────────────────
 
-//     private static OrderDto MapOrder(Order o) => new(
-//         o.Id, o.AperturaId, o.Department.ToString(), o.CustomerName,
-//         o.ConsumeType.ToString(), o.TableNumber,
-//         o.Items.Select(i => new OrderItemDto(i.ProductId, i.ProductName, i.Quantity, i.UnitPrice, i.Subtotal)).ToList(),
-//         o.Total, o.PaymentMethod.ToString(), o.Status.ToString(),
-//         o.CreatedAt, o.DeliveredAt, o.CreatedBy
-//     );
-// }
+    private async  Task<DayCycleReportDto> BuildCycleReport(int reportId, Apertura a)
+    {
+        var corte = a.Corte!;
+        var orders = a.Orders.ToList();
+
+      
+
+        var cashSales = await db.OrderItems
+        .Where(i =>
+            i.Order!.AperturaId == a.Id &&
+            i.Order.PaymentMethod == PaymentMethod.cash &&
+            i.Department == Department.creperia)
+        .SumAsync(i => i.Subtotal);
+
+        var tiendaCashSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == a.Id &&
+                i.Order.PaymentMethod == PaymentMethod.cash &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
+
+
+        var cardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == a.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.creperia)
+            .SumAsync(i => i.Subtotal);
+
+        var tiendaCardSales = await db.OrderItems
+            .Where(i =>
+                i.Order!.AperturaId == a.Id &&
+                i.Order.PaymentMethod == PaymentMethod.card &&
+                i.Department == Department.tienda)
+            .SumAsync(i => i.Subtotal);
+
+        return new DayCycleReportDto(
+            Id:            reportId,
+            Apertura:      new AperturaDtoReport(a.Id, a.OpenedBy, a.OpenedAt, a.OpeningCash, a.TiendaOpeningCash, a.Status.ToString()),
+            Corte:         new CorteDto(corte.Id, corte.AperturaId, corte.ClosedBy, 
+                                        corte.ClosedAt, corte.ClosingCash,  corte.ExpectedCash, 
+                                        corte.CardSales,corte.Difference, corte.TiendaClosingCash, 
+                                        corte.TiendaExpectedCash,
+                                        corte.TiendaCardSales, corte.Difference),
+            Orders:        orders.Select(MapOrder).ToList(),
+            TotalOrders:   orders.Count,
+            TotalCashSales: cashSales,
+            TotalCardSales: cardSales,
+            GrandTotal:    cashSales + cardSales,
+            TiendaTotalCashSales: tiendaCashSales,
+            TiendaTotalCardSales: tiendaCardSales,
+            TiendaGrandTotal:    tiendaCashSales + tiendaCardSales,
+            AllGrandTotal: cashSales + cardSales + tiendaCashSales + tiendaCardSales,
+            Date:          a.OpenedAt.ToString("yyyy-MM-dd")
+        );
+    }
+
+    private static OrderDto MapOrder(Order o) => new(
+        o.Id, o.AperturaId,  o.CustomerName,
+        o.ConsumeType.ToString(), o.TableNumber,
+        o.Items.Select(i => new OrderItemDto(i.ProductId,  i.ProductName, i.Department.ToString(), i.Quantity, i.UnitPrice, i.Subtotal)).ToList(),
+        o.Total, o.PaymentMethod.ToString(), o.Status.ToString(),
+        o.CreatedAt, o.DeliveredAt, o.CreatedBy
+    );
+}

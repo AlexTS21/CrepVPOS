@@ -45,6 +45,15 @@ public record AperturaDto(
     decimal TiendaCardSales
 );
 
+public record AperturaDtoReport(
+    int Id,
+    int OpenedBy,
+    DateTime OpenedAt,
+    decimal OpeningCash,
+    decimal TiendaOpeningCash,
+    string Status
+);
+
 public record CorteDto(
     int Id,
     int AperturaId,
@@ -129,13 +138,16 @@ public record OrderDto(
 
 public record DayCycleReportDto(
     int Id,
-    string Department,
-    AperturaDto Apertura,
+    AperturaDtoReport Apertura,
     CorteDto Corte,
     List<OrderDto> Orders,
     int TotalOrders,
     decimal TotalCashSales,
     decimal TotalCardSales,
     decimal GrandTotal,
+    decimal TiendaTotalCashSales,
+    decimal TiendaTotalCardSales,
+    decimal TiendaGrandTotal,
+    decimal AllGrandTotal,
     string Date
 );

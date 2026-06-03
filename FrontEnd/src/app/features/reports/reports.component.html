@@ -15,11 +15,6 @@
             </div>
         </div>
         <div class="filter-row">
-            <select class="filter-select" [(ngModel)]="filterDept">
-                <option value="">Todos los depts.</option>
-                <option value="creperia">Crepería</option>
-                <option value="tienda">Tienda</option>
-            </select>
             <button class="btn-primary small" (click)="loadReports()">Buscar</button>
         </div>
     </div>
@@ -42,7 +37,8 @@
                 </div>
                 <div class="cycle-summary">
                     <span class="cycle-orders">{{ cycle.totalOrders }} órdenes</span>
-                    <span class="cycle-total">{{ cycle.grandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    <span class="cycle-total"><app-icon name="tienda"></app-icon> {{ cycle.tiendaGrandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    <span class="cycle-total">CrepV: {{ cycle.grandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
                 </div>
                 <svg class="chevron" [class.rotated]="expandedId() === cycle.id" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
@@ -55,7 +51,7 @@
                 <!-- Apertura -->
                 <div class="detail-section">
                     <div class="detail-label">APERTURA</div>
-                    <div class="detail-row">
+                    <div class="detail-row strong">
                         <span>Hora</span>
                         <span>{{ cycle.apertura.openedAt | date:'HH:mm' }}</span>
                     </div>
@@ -63,12 +59,16 @@
                         <span>Efectivo inicial</span>
                         <span>{{ cycle.apertura.openingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
                     </div>
+                    <div class="detail-row">
+                        <span>Efectivo inicial Tienda</span>
+                        <span>{{ cycle.apertura.tiendaOpeningCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
                 </div>
 
                 <!-- Corte -->
                 <div class="detail-section">
                     <div class="detail-label">CORTE</div>
-                    <div class="detail-row">
+                    <div class="detail-row strong">
                         <span>Hora</span>
                         <span>{{ cycle.corte.closedAt | date:'HH:mm' }}</span>
                     </div>
@@ -88,6 +88,23 @@
                         <span>Diferencia</span>
                         <span>{{ cycle.corte.difference | currency:'MXN':'symbol':'1.2-2' }}</span>
                     </div>
+
+                    <div class="detail-row">
+                        <span>Efectivo contado Tienda</span>
+                        <span>{{ cycle.corte.tiendaClosingCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Ventas tarjeta Tienda</span>
+                        <span>{{ cycle.corte.tiendaCardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Esperado Tienda</span>
+                        <span>{{ cycle.corte.tiendaExpectedCash | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row highlight" [class.negative]="cycle.corte.difference < 0">
+                        <span>Diferencia Tienda</span>
+                        <span>{{ cycle.corte.tiendaDifference | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
                 </div>
 
                 <!-- Ventas -->
@@ -104,6 +121,22 @@
                     <div class="detail-row strong">
                         <span>Total</span>
                         <span>{{ cycle.grandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-label">VENTAS TIENDA</div>
+                    <div class="detail-row">
+                        <span>Efectivo Tienda</span>
+                        <span>{{ cycle.tiendaTotalCashSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Tarjeta Tienda</span>
+                        <span>{{ cycle.tiendaTotalCardSales | currency:'MXN':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-row strong">
+                        <span>Total Tienda</span>
+                        <span>{{ cycle.tiendaGrandTotal | currency:'MXN':'symbol':'1.2-2' }}</span>
                     </div>
                 </div>
 
